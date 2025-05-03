@@ -60,34 +60,34 @@ def mk_cost_lines(x,y,w,b, ax):
 
 def plt_intuition(x_train, y_train):
 
-    w_range = np.array([200-200,200+200])
+    m_range = np.array([200-200,200+200])
     tmp_b = 100
 
-    w_array = np.arange(*w_range, 5)
-    cost = np.zeros_like(w_array)
-    for i in range(len(w_array)):
-        tmp_w = w_array[i]
-        cost[i] = compute_cost(x_train, y_train, tmp_w, tmp_b)
+    m_array = np.arange(*m_range, 5)
+    cost = np.zeros_like(m_array)
+    for i in range(len(m_array)):
+        tmp_m = m_array[i]
+        cost[i] = compute_cost(x_train, y_train, tmp_m, tmp_b)
 
-    @interact(w=(*w_range,10),continuous_update=False)
-    def func( w=150):
-        f_wb = np.dot(x_train, w) + tmp_b
+    @interact(mw=(*m_range,10),continuous_update=False)
+    def func( m=150):
+        f_mb = np.dot(x_train, m) + tmp_b
         
         fig, ax = plt.subplots(1, 2, constrained_layout=True, figsize=(8,4))
         
         fig.canvas.toolbar_position = 'bottom'
 
-        mk_cost_lines(x_train, y_train, w, tmp_b, ax[0])
-        plt_x(x_train, y_train, f_wb=f_wb, ax=ax[0])
+        mk_cost_lines(x_train, y_train, m, tmp_b, ax[0])
+        plt_x(x_train, y_train, f_wb=f_mb, ax=ax[0])
 
-        ax[1].plot(w_array, cost)
-        cur_cost = compute_cost(x_train, y_train, w, tmp_b)
-        ax[1].scatter(w,cur_cost, s=100, color=dldarkred, zorder= 10, label= f"cost at w={w}")
-        ax[1].hlines(cur_cost, ax[1].get_xlim()[0],w, lw=4, color=dlpurple, ls='dotted')
-        ax[1].vlines(w, ax[1].get_ylim()[0],cur_cost, lw=4, color=dlpurple, ls='dotted')
-        ax[1].set_title("Cost vs. w, (b fixed at 100)")
+        ax[1].plot(m_array, cost)
+        cur_cost = compute_cost(x_train, y_train, m, tmp_b)
+        ax[1].scatter(m,cur_cost, s=100, color=dldarkred, zorder= 10, label= f"cost at m={m}")
+        ax[1].hlines(cur_cost, ax[1].get_xlim()[0],m, lw=4, color=dlpurple, ls='dotted')
+        ax[1].vlines(m, ax[1].get_ylim()[0],cur_cost, lw=4, color=dlpurple, ls='dotted')
+        ax[1].set_title("Cost vs. m, (b fixed at 100)")
         ax[1].set_ylabel('Cost')
-        ax[1].set_xlabel('w')
+        ax[1].set_xlabel('m')
         ax[1].legend(loc='upper center')
         fig.suptitle(f"Minimize Cost: Current Cost = {cur_cost:0.0f}", fontsize=12)
         plt.show()
@@ -242,10 +242,10 @@ def inbounds(a,b,xlim,ylim):
         return True
     return False
 
-def plt_contour_wgrad(x, y, hist, ax, w_range=[-100, 500, 5], b_range=[-500, 500, 5],
+def plt_contour_mgrad(x, y, hist, ax, m_range=[-100, 500, 5], b_range=[-500, 500, 5],
                 contours = [0.1,50,1000,5000,10000,25000,50000],
                       resolution=5, w_final=200, b_final=100,step=10 ):
-    b0,w0 = np.meshgrid(np.arange(*b_range),np.arange(*w_range))
+    b0,w0 = np.meshgrid(np.arange(*b_range),np.arange(*m_range))
     z=np.zeros_like(b0)
     for i in range(w0.shape[0]):
         for j in range(w0.shape[1]):
@@ -302,9 +302,9 @@ def plt_divergence(p_hist, J_hist, x_train,y_train):
 
     ax.plot(w_array, cost)
     ax.plot(x,v, c=dlmagenta)
-    ax.set_title("Cost vs w, b set to 100")
+    ax.set_title("Cost vs m, b set to 100")
     ax.set_ylabel('Cost')
-    ax.set_xlabel('w')
+    ax.set_xlabel('m')
     ax.xaxis.set_major_locator(MaxNLocator(2))
 
     #===============
@@ -394,3 +394,17 @@ def plt_gradients(x_train,y_train, f_compute_cost, f_compute_gradient):
     ax[1].quiverkey(Q, 0.9, 0.9, 2, r'$2 \frac{m}{s}$', labelpos='E',coordinates='figure')
     ax[1].set_xlabel("m"); ax[1].set_ylabel("b")
 
+def compute_model_output(x, m, b):
+    """
+    Computes the prediction of a linear model
+    Args:
+        x (ndarray (X,)): Data, X examples 
+        m,b (scalar)    : model parameters  
+    Returns
+        f_wb (ndarray (y_pred,)): model prediction
+    """
+    X = x.shape[0]
+    y_pred = np.zeros(X)
+    for i in range(X):
+        y_pred[i] = m * x[i].item() + b
+    return y_pred
